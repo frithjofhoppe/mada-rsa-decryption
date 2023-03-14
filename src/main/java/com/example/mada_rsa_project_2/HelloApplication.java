@@ -32,7 +32,7 @@ public class HelloApplication extends Application {
         BigInteger phiOfN = phi(n);
         BigInteger e = generateCoprime(phiOfN);
 
-        extendedEuclideanAlgorithm(phiOfN, );
+        //extendedEuclideanAlgorithm(phiOfN, );
         return "";
     }
 

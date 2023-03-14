@@ -20,4 +20,10 @@ public class HelloController {
         fileChooser.showOpenDialog(stage);
 
     }
+
+    @FXML
+    protected void generateRsaKeyPair() {
+        //TODO
+        System.out.println("test");
+    }
 }
