@@ -12,6 +12,6 @@
     </padding>
 
     <Label fx:id="welcomeText"/>
-    <Button text="Generate RSA Key Pair" onAction="#generateRsaKeyPair"/>
+    <Button text="Generate RSA Key Pair" onAction="#generateRSAKeyPair"/>
     <Button text="Upload File to encrypt!" onAction="#uploadFile"/>
 </VBox>
