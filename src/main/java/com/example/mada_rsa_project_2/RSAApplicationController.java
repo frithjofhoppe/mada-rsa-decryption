@@ -22,18 +22,22 @@ public class RSAApplicationController {
 
     private Stage stage;
 
+    /**
+     * Encrypt plain text file with existing public key
+     */
     @FXML
     public void encryptFile() {
         try {
-            // Import existing key pair
+            // Exercise 2
+            // a) Select public key file
             File publicKeyFile = selectFile("Public Key");
             List<String> publicKeyPair = getKeyPairOfFile(publicKeyFile);
             BigInteger n = new BigInteger(publicKeyPair.get(0));
             BigInteger a = new BigInteger(publicKeyPair.get(1));
-
             File plainTextFile = selectFile("Chose text file with content");
             BufferedReader plainTextFileReader = new BufferedReader(new FileReader(plainTextFile));
 
+            // b) Convert characters to ASCII and apply fast exponentiation
             int x = 0;
             ArrayList<String> processed = new ArrayList<>();
             while ((x = plainTextFileReader.read()) != -1) {
@@ -43,6 +47,7 @@ public class RSAApplicationController {
                 );
             }
 
+            // c) Save encrypted file
             FileWriter writer = new FileWriter("cipher.txt");
             writer.write(processed.stream().collect(Collectors.joining(",")));
             writer.close();
@@ -53,10 +58,14 @@ public class RSAApplicationController {
         }
     }
 
+    /**
+     * Decrypt ciphered content with existing private key
+     */
     @FXML
     public void decryptFile() {
         try {
-            // Import existing key pair
+            // Exercise 3
+            // a) Select private key file
             File publicKeyFile = selectFile("Private Key");
             List<String> publicKeyPair = getKeyPairOfFile(publicKeyFile);
             BigInteger n = new BigInteger(publicKeyPair.get(0));
@@ -75,7 +84,8 @@ public class RSAApplicationController {
                 );
             }
 
-            FileWriter writer = new FileWriter("plain.txt");
+            // Store decrypted file
+            FileWriter writer = new FileWriter("text-d.txt");
             writer.write(String.join("", processed));
             writer.close();
         } catch (FileNotFoundException e) {
@@ -85,31 +95,54 @@ public class RSAApplicationController {
         }
     }
 
-
-    protected void calculateFile(String fileType, String outputFileName, String outputDelimiter, IKeyPair processor) {
+    /**
+     * Generate RSA key pair
+     */
+    @FXML
+    private void generateRSAKeyPair() {
         try {
-            // Import existing key pair
-            File publicKeyFile = selectFile(fileType);
-            List<String> publicKeyPair = getKeyPairOfFile(publicKeyFile);
-            BigInteger n = new BigInteger(publicKeyPair.get(0));
-            BigInteger a = new BigInteger(publicKeyPair.get(1));
+            // Exercise 1
+            // a) Generate random prime numbers
+            BigInteger p = generateRandomPrime();
+            BigInteger q = generateRandomPrime();
+            BigInteger n = p.multiply(q);
+            BigInteger phiOfN = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE));
 
-            File plainTextFile = selectFile("Chose text file with content");
-            BufferedReader plainTextFileReader = new BufferedReader(new FileReader(plainTextFile));
+            // b)  Choose public exponent e and calculate private exponent d
+            BigInteger e = generateCoprime(phiOfN);
+            BigInteger[] values = extendedEuclideanAlgorithm(phiOfN, e);
+            BigInteger d = values[2];
 
-            int x = 0;
-            ArrayList<String> processed = processor.process(a, n);
+            System.out.println("p:" + p);
+            System.out.println("q:" + q);
+            System.out.println("n:" + n);
+            System.out.println("PhiOfN:" + phiOfN);
+            System.out.println("e:" + e);
+            System.out.println("d:" + d);
+            String publicKeyPair = "(" + n + "," + e + ")";
+            String privateKeyPair = "(" + n + "," + d + ")";
 
-            FileWriter writer = new FileWriter(outputFileName);
-            writer.write(processed.stream().collect(Collectors.joining(outputDelimiter)));
-            writer.close();
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            // c) Write public/private key pairs to file
+            FileWriter privateKeyFw = new FileWriter("sk.txt");
+            FileWriter publicKeyFw = new FileWriter("pk.txt");
+            privateKeyFw.write(privateKeyPair);
+            publicKeyFw.write(publicKeyPair);
+            privateKeyFw.close();
+            publicKeyFw.close();
+            System.out.println("Successfully wrote to the file.");
+        } catch (IOException exception) {
+            System.out.println("An error occurred.");
+            exception.printStackTrace();
         }
     }
 
+    /**
+     * Calculating mod by using fast exponentiation
+     * @param basis
+     * @param exponent
+     * @param modOperand
+     * @return: Rest of basis^exponent mod modOperand
+     */
     private BigInteger fastMod(BigInteger basis, BigInteger exponent, BigInteger modOperand) {
         String binary = exponent.toString(2);
         BigInteger h = new BigInteger("1");
@@ -133,47 +166,23 @@ public class RSAApplicationController {
                 .toList();
     }
 
+    /**
+     * Pick file
+     * @param title
+     * @return
+     */
     private File selectFile(String title) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle(title);
         return fileChooser.showOpenDialog(stage);
     }
 
-    @FXML
-    private void generateRSAKeyPair() {
-        try {
-            BigInteger p = generateRandomPrime();
-            BigInteger q = generateRandomPrime();
-            BigInteger n = p.multiply(q);
-            BigInteger phiOfN = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE));
-            BigInteger e = generateCoprime(phiOfN);
-            BigInteger[] values = extendedEuclideanAlgorithm(phiOfN, e);
-            BigInteger d = values[2];
-            System.out.println("p:" + p);
-            System.out.println("q:" + q);
-            System.out.println("n:" + n);
-            System.out.println("PhiOfN:" + phiOfN);
-            System.out.println("e:" + e);
-            System.out.println("d:" + d);
-
-            String publicKeyPair = "(" + n + "," + e + ")";
-            String privateKeyPair = "(" + n + "," + d + ")";
-
-            FileWriter writer1 = new FileWriter("private-key.txt");
-            FileWriter writer2 = new FileWriter("public-key.txt");
-            writer1.write(privateKeyPair);
-            writer2.write(publicKeyPair);
-            writer1.close();
-            writer2.close();
-            System.out.println("Successfully wrote to the file.");
-        } catch (IOException exception) {
-            System.out.println("An error occurred.");
-            exception.printStackTrace();
-        }
-    }
-
-    // Generiert teilerfremde Zahl zu n
-    public static BigInteger generateCoprime(BigInteger n) {
+    /**
+     * Generate public exponent starting by three
+     * @param n
+     * @return
+     */
+    private BigInteger generateCoprime(BigInteger n) {
         BigInteger result = new BigInteger("3");
         while (result.compareTo(n) >= 0 || !result.gcd(n).equals(BigInteger.ONE)) {
             result = result.add(new BigInteger("1"));
@@ -181,8 +190,11 @@ public class RSAApplicationController {
         return result;
     }
 
-    // Primzahlen generieren
-    public static BigInteger generateRandomPrime() {
+    /**
+     * Generate random 8 digit prime number
+     * @return
+     */
+    private BigInteger generateRandomPrime() {
         Random random = new Random();
         int maxDigits = 8;
         BigInteger prim = new BigInteger(maxDigits * 3, random);
@@ -192,7 +204,21 @@ public class RSAApplicationController {
         return prim;
     }
 
-    public static BigInteger[] internalEuclidAlgo(BigInteger a, BigInteger b) {
+    /**
+     * Calculate a', x0, y0
+     * @param a
+     * @param b
+     * @return [a', x0, y0]
+     */
+    private BigInteger[] extendedEuclideanAlgorithm(BigInteger a, BigInteger b) {
+        var result = internalEuclidAlgo(a,b);
+        if(result[2].compareTo(BigInteger.ZERO) < 0) {
+            result[2] = result[2].add(a);
+        }
+        return result;
+    }
+
+    private BigInteger[] internalEuclidAlgo(BigInteger a, BigInteger b) {
         if(b.equals(BigInteger.ZERO)) {
             return new BigInteger[] {
                     a, BigInteger.ONE, BigInteger.ZERO
@@ -206,14 +232,5 @@ public class RSAApplicationController {
                         a.divideAndRemainder(b)[0].multiply(modified[2])
                 )
         };
-    }
-
-    // Erweiterter euklidischer Algorithmus
-    public static BigInteger[] extendedEuclideanAlgorithm(BigInteger a, BigInteger b) {
-        var result = internalEuclidAlgo(a,b);
-        if(result[2].compareTo(BigInteger.ZERO) < 0) {
-            result[2] = result[2].add(a);
-        }
-        return result;
     }
 }

@@ -14,5 +14,5 @@
     <Label fx:id="welcomeText"/>
     <Button text="1. Generate RSA Key Pair" onAction="#generateRSAKeyPair"/>
     <Button text="2. Encrpyt file" onAction="#encryptFile"/>
-    <Button text="2. Decrypt file" onAction="#decryptFile"/>
+    <Button text="3. Decrypt file" onAction="#decryptFile"/>
 </VBox>
