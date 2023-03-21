@@ -65,7 +65,7 @@
                         <id>default-cli</id>
                         <configuration>
                             <mainClass>
-                                com.example.mada_rsa_project_2/com.example.mada_rsa_project_2.HelloApplication
+                                com.example.mada_rsa_project_2/com.example.mada_rsa_project_2.RSAApplication
                             </mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>

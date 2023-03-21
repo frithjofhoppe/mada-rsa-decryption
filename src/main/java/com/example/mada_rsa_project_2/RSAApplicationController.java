@@ -15,7 +15,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 
-public class HelloController {
+public class RSAApplicationController {
 
     @FXML
     private Label welcomeText;
@@ -155,15 +155,6 @@ public class HelloController {
             System.out.println("PhiOfN:" + phiOfN);
             System.out.println("e:" + e);
             System.out.println("d:" + d);
-
-//            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-//            keyGen.initialize(2048);
-//            KeyPair pair = keyGen.generateKeyPair();
-//            RSAPrivateKey privateKey = (RSAPrivateKey) pair.getPrivate();
-//            RSAPublicKey publicKey = (RSAPublicKey) pair.getPublic();
-//            BigInteger n = privateKey.getModulus();
-//            BigInteger e = publicKey.getPublicExponent();
-//            BigInteger d = privateKey.getPrivateExponent();
 
             String publicKeyPair = "(" + n + "," + e + ")";
             String privateKeyPair = "(" + n + "," + d + ")";
