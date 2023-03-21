@@ -2,16 +2,11 @@ package com.example.mada_rsa_project_2;
 
 import java.io.*;
 import java.math.BigInteger;
-import java.net.ServerSocket;
 import java.nio.file.Files;
-import java.security.*;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javafx.fxml.FXML;
@@ -147,34 +142,34 @@ public class HelloController {
     @FXML
     private void generateRSAKeyPair() {
         try {
-//            BigInteger p = generateRandomPrime();
-//            BigInteger q = generateRandomPrime();
-//            BigInteger n = p.multiply(q);
-//            BigInteger phiOfN = phi(n);
-//            BigInteger e = generateCoprime(phiOfN);
-//            BigInteger[] values = extendedEuclideanAlgorithm(n, e);
-//            BigInteger d = values[2];
-//            System.out.println("p:" + p);
-//            System.out.println("q:" + q);
-//            System.out.println("n:" + n);
-//            System.out.println("PhiOfN:" + phiOfN);
-//            System.out.println("e:" + e);
-//            System.out.println("d:" + d);
+            BigInteger p = generateRandomPrime();
+            BigInteger q = generateRandomPrime();
+            BigInteger n = p.multiply(q);
+            BigInteger phiOfN = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE));
+            BigInteger e = generateCoprime(phiOfN);
+            BigInteger[] values = extendedEuclideanAlgorithm(phiOfN, e);
+            BigInteger d = values[2];
+            System.out.println("p:" + p);
+            System.out.println("q:" + q);
+            System.out.println("n:" + n);
+            System.out.println("PhiOfN:" + phiOfN);
+            System.out.println("e:" + e);
+            System.out.println("d:" + d);
 
-            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-            keyGen.initialize(2048);
-            KeyPair pair = keyGen.generateKeyPair();
-            RSAPrivateKey privateKey = (RSAPrivateKey) pair.getPrivate();
-            RSAPublicKey publicKey = (RSAPublicKey) pair.getPublic();
-            BigInteger n = privateKey.getModulus();
-            BigInteger e = publicKey.getPublicExponent();
-            BigInteger d = privateKey.getPrivateExponent();
+//            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+//            keyGen.initialize(2048);
+//            KeyPair pair = keyGen.generateKeyPair();
+//            RSAPrivateKey privateKey = (RSAPrivateKey) pair.getPrivate();
+//            RSAPublicKey publicKey = (RSAPublicKey) pair.getPublic();
+//            BigInteger n = privateKey.getModulus();
+//            BigInteger e = publicKey.getPublicExponent();
+//            BigInteger d = privateKey.getPrivateExponent();
 
             String publicKeyPair = "(" + n + "," + e + ")";
             String privateKeyPair = "(" + n + "," + d + ")";
 
-            FileWriter writer1 = new FileWriter("sk.txt");
-            FileWriter writer2 = new FileWriter("pk.txt");
+            FileWriter writer1 = new FileWriter("private-key.txt");
+            FileWriter writer2 = new FileWriter("public-key.txt");
             writer1.write(privateKeyPair);
             writer2.write(publicKeyPair);
             writer1.close();
@@ -183,8 +178,6 @@ public class HelloController {
         } catch (IOException exception) {
             System.out.println("An error occurred.");
             exception.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -208,38 +201,28 @@ public class HelloController {
         return prim;
     }
 
-    // Eulische Phi Funktion
-    public static BigInteger phi(BigInteger n) {
-        BigInteger result = n;
-        BigInteger i = BigInteger.valueOf(2);
-        while (i.multiply(i).compareTo(n) <= 0) {
-            if (n.mod(i).equals(BigInteger.ZERO)) {
-                result = result.subtract(result.divide(i));
-                while (n.mod(i).equals(BigInteger.ZERO)) {
-                    n = n.divide(i);
-                }
-            }
-            i = i.add(BigInteger.ONE);
+    public static BigInteger[] internalEuclidAlgo(BigInteger a, BigInteger b) {
+        if(b.equals(BigInteger.ZERO)) {
+            return new BigInteger[] {
+                    a, BigInteger.ONE, BigInteger.ZERO
+            };
         }
-        if (n.compareTo(BigInteger.ONE) > 0) {
-            result = result.subtract(result.divide(n));
-        }
-        return result;
+        var modified = internalEuclidAlgo(b, a.mod(b));
+        return new BigInteger[] {
+                modified[0],
+                modified[2],
+                modified[1].subtract(
+                        a.divideAndRemainder(b)[0].multiply(modified[2])
+                )
+        };
     }
 
     // Erweiterter euklidischer Algorithmus
     public static BigInteger[] extendedEuclideanAlgorithm(BigInteger a, BigInteger b) {
-        BigInteger[] result = new BigInteger[3];
-        if (b.compareTo(BigInteger.ZERO) == 0) {
-            result[0] = a;
-            result[1] = BigInteger.ONE;
-            result[2] = BigInteger.ZERO;
-            return result;
+        var result = internalEuclidAlgo(a,b);
+        if(result[2].compareTo(BigInteger.ZERO) < 0) {
+            result[2] = result[2].add(a);
         }
-        BigInteger[] temp = extendedEuclideanAlgorithm(b, a.mod(b));
-        result[0] = temp[0];
-        result[1] = temp[2];
-        result[2] = temp[1].subtract(a.divide(b).multiply(temp[2]));
         return result;
     }
 }
