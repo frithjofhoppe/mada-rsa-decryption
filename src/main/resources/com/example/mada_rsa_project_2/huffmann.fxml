@@ -12,5 +12,6 @@
     </padding>
 
     <Label fx:id="welcomeText"/>
-    <Button text="1. Generate coding table " onAction="#generateCodingTable"/>
+    <Button text="1. Encode content with huffman table" onAction="#createHuffmanTableAndEncodedContent"/>
+    <Button text="2. Decode content with huffman table" onAction="#createDecodedContentWithHuffmanTable"/>
 </VBox>

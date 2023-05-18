@@ -37,8 +37,12 @@ public class TreeNode implements Comparable<TreeNode> {
         return asciiSymbol != null;
     }
 
-    public String getAsciiSymbol() {
+    public String getSymbol() {
         return asciiSymbol;
+    }
+
+    public char getSymbolAsChar() {
+        return asciiSymbol.charAt(0);
     }
 
     public double getOccurrence() {

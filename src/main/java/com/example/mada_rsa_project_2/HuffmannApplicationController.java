@@ -21,38 +21,111 @@ public class HuffmannApplicationController {
 
 
     @FXML
-    private void generateCodingTable() {
+    private void createDecodedContentWithHuffmanTable() {
+
+    }
+
+    @FXML
+    private void createHuffmanTableAndEncodedContent() {
         var file = selectFile("File with plain text");
         try {
+            // Create dictionary from text file
             var rawContent = Files.readAllLines(file.toPath());
             var occurreneMap = calculateOccurrence(rawContent);
             var topTreeNode = createHuffmannTree(occurreneMap);
             var dictionary = createTreeDictionary(topTreeNode);
-            var output = dictionary.keySet()
+
+            // Convert original text to one bit string
+            List<Character> rawContentChars = rawContent
                     .stream()
-                    .map(asciiSymbol -> String.format("%s:%s", (int)asciiSymbol.charAt(0), dictionary.get(asciiSymbol)))
+                    .map(line -> line.chars().mapToObj(c -> (char)c).toList())
+                    .flatMap(List::stream).toList();
+            String bitString = convertTextToBitString(rawContentChars, dictionary);
+
+            // Write converted content to output.dat
+            FileOutputStream encodedContentFos = new FileOutputStream("output.dat");
+            encodedContentFos.write(convertBitStringToBytePresentation(bitString));
+            encodedContentFos.close();
+
+            // Write dictionary to dec_tab.txt
+            var dictionaryOutput = dictionary.keySet()
+                    .stream()
+                    .map(asciiSymbol -> String.format("%s:%s", (int)asciiSymbol, dictionary.get(asciiSymbol)))
                     .collect(Collectors.joining("-"));
             FileWriter decTab = new FileWriter("dec_tab.txt");
-            decTab.write(output);
+            decTab.write(dictionaryOutput);
             decTab.close();
         } catch (IOException e) {
-            System.out.println("Error when reading file");
+            System.out.println("Error when reading/writing file file");
         }
     }
 
-    private Map<String, String> createTreeDictionary(TreeNode topNode) {
+    /**
+     * Convert bitString to actual byte array
+     * @param bitString String like "0001010101"
+     * @return Converted string->byte[]
+     */
+    private byte[] convertBitStringToBytePresentation(String bitString) {
+        String bitString8 = fillBitStringUp(bitString);
+        String[] byteChunks = bitString8.split("(?<=\\G.{" + 8 + "})");
+        byte[] convertedContent = new byte[byteChunks.length];
+        for(int i = 0; i < convertedContent.length; i++){
+            convertedContent[0] = (byte)Integer.parseInt(byteChunks[0],2);
+        }
+        return convertedContent;
+    }
+
+    /**
+     * Fill up string with 100000... so that the content can be divided by 8
+     * @param bitString
+     * @return bitString where length % 8 == 0
+     */
+    private String fillBitStringUp(String bitString) {
+        StringBuilder bitStringBuilder = new StringBuilder(bitString);
+        bitStringBuilder.append("1");
+        while (bitStringBuilder.length() % 8 != 0) {
+            bitStringBuilder.append("0");
+        }
+        return bitStringBuilder.toString();
+    }
+
+    /**
+     * Convert symbol to code by using the dictionary
+     * @param chars Symbols
+     * @param dictionary Mapping symbol->code
+     * @return Concatenated string of codes
+     */
+    private String convertTextToBitString(List<Character> chars, Map<Character, String> dictionary) {
+        return chars
+                .stream()
+                .map(dictionary::get)
+                .collect(Collectors.joining());
+    }
+
+    /**
+     * Create dictionary with symbol->code mapping
+     * @param topNode: Combined node with 100% occurrence
+     * @return map symbol->code
+     */
+    private Map<Character, String> createTreeDictionary(TreeNode topNode) {
         final String START_CODE_WORD = "0";
-        Map<String, String> dictionary = new HashMap<>();
+        Map<Character, String> dictionary = new HashMap<>();
         internalTreeCreation(topNode, START_CODE_WORD, dictionary);
         return dictionary;
     }
 
-    private void internalTreeCreation(TreeNode node, String codeWord, Map<String, String> dictionary) {
+    /**
+     * Recursive implementation of symbol->code map creation
+     * @param node: Current node in the tree
+     * @param codeWord: Concatenated code word "01001..."
+     * @param dictionary: Symbol->code mapping
+     */
+    private void internalTreeCreation(TreeNode node, String codeWord, Map<Character, String> dictionary) {
         if(node == null){
             return;
         }
         if(node.isALeaf()) {
-            dictionary.put(node.getAsciiSymbol(), codeWord);
+            dictionary.put(node.getSymbolAsChar(), codeWord);
         }
         internalTreeCreation(node.getLeft(), codeWord + "0", dictionary);
         internalTreeCreation(node.getRight(), codeWord + "1", dictionary);
@@ -60,7 +133,7 @@ public class HuffmannApplicationController {
 
     /**
      * Convert occurrence in a TreeNode structure
-     * @param symbolOccurrence
+     * @param symbolOccurrence: Occurrence of a symbol as percentage e,g, 40.0 -> 40%
      * @return top node with the highest occurrence of the tree with reference to the nodes below
      */
     private TreeNode createHuffmannTree(Map<Character, Double> symbolOccurrence){
