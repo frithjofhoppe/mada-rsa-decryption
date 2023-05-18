@@ -103,6 +103,12 @@ public class HuffmannApplicationController {
         }
     }
 
+    /**
+     * Go through bitString and search matching sample in the dictionary
+     * @param rawContent: Bit string from file
+     * @param dictionary: Mapping symbol->code
+     * @return Decoded content
+     */
     private String decodeContent(String rawContent, Map<Character, String> dictionary) {
         // Convert bitString to symbol
         StringBuilder sb = new StringBuilder();
