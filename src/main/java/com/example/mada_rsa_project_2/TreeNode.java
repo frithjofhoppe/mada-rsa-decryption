@@ -2,6 +2,9 @@ package com.example.mada_rsa_project_2;
 
 import java.util.Comparator;
 
+/**
+ * Node of a Huffmann Tree
+ */
 public class TreeNode implements Comparable<TreeNode> {
     private String asciiSymbol;
     private double occurrence;
@@ -36,11 +39,6 @@ public class TreeNode implements Comparable<TreeNode> {
     public boolean isALeaf() {
         return asciiSymbol != null;
     }
-
-    public String getSymbol() {
-        return asciiSymbol;
-    }
-
     public char getSymbolAsChar() {
         return asciiSymbol.charAt(0);
     }
