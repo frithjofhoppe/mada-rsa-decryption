@@ -11,4 +11,4 @@
    - the file you want to decrypt
 
 ## Code
-Logic is located [here](src/main/java/com/example/mada_rsa_project_2/RSAApplicationController.java)
+Logic is located [here](src/main/java/com/example/mada/RSAApplicationController.java)

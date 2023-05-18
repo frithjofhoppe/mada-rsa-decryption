@@ -6,11 +6,13 @@
 
 <?import javafx.scene.control.Button?>
 <VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.example.mada_rsa_project_2.HuffmannApplicationController">
+      fx:controller="com.example.mada.rsa.RSAApplicationController">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
     </padding>
 
     <Label fx:id="welcomeText"/>
-    <Button text="1. Generate coding table " onAction="#generateCodingTable"/>
+    <Button text="1. Generate RSA Key Pair" onAction="#generateRSAKeyPair"/>
+    <Button text="2. Encrpyt file" onAction="#encryptFile"/>
+    <Button text="3. Decrypt file" onAction="#decryptFile"/>
 </VBox>

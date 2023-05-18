@@ -1,9 +1,4 @@
-package com.example.mada_rsa_project_2;
-
-import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
+package com.example.mada.rsa;
 
 import java.io.*;
 import java.math.BigInteger;
@@ -11,100 +6,18 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import javafx.fxml.FXML;
+import javafx.scene.control.Label;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
-public class HuffmannApplicationController {
+
+public class RSAApplicationController {
 
     @FXML
     private Label welcomeText;
 
     private Stage stage;
-
-
-    @FXML
-    private void generateCodingTable() {
-        var file = selectFile("File with plain text");
-        try {
-            var rawContent = Files.readAllLines(file.toPath());
-            var occurreneMap = calculateOccurrence(rawContent);
-            var topTreeNode = createHuffmannTree(occurreneMap);
-            var dictionary = createTreeDictionary(topTreeNode);
-            var output = dictionary.keySet()
-                    .stream()
-                    .map(asciiSymbol -> String.format("%s:%s", (int)asciiSymbol.charAt(0), dictionary.get(asciiSymbol)))
-                    .collect(Collectors.joining("-"));
-            FileWriter decTab = new FileWriter("dec_tab.txt");
-            decTab.write(output);
-            decTab.close();
-        } catch (IOException e) {
-            System.out.println("Error when reading file");
-        }
-    }
-
-    private Map<String, String> createTreeDictionary(TreeNode topNode) {
-        final String START_CODE_WORD = "0";
-        Map<String, String> dictionary = new HashMap<>();
-        internalTreeCreation(topNode, START_CODE_WORD, dictionary);
-        return dictionary;
-    }
-
-    private void internalTreeCreation(TreeNode node, String codeWord, Map<String, String> dictionary) {
-        if(node == null){
-            return;
-        }
-        if(node.isALeaf()) {
-            dictionary.put(node.getAsciiSymbol(), codeWord);
-        }
-        internalTreeCreation(node.getLeft(), codeWord + "0", dictionary);
-        internalTreeCreation(node.getRight(), codeWord + "1", dictionary);
-    }
-
-    /**
-     * Convert occurrence in a TreeNode structure
-     * @param symbolOccurrence
-     * @return top node with the highest occurrence of the tree with reference to the nodes below
-     */
-    private TreeNode createHuffmannTree(Map<Character, Double> symbolOccurrence){
-        // Add all elements to a priority queue, sorted by the occurrence
-        PriorityQueue<TreeNode> heap = new PriorityQueue<>();
-        symbolOccurrence.forEach((asciiSymbol, occurrence) -> heap.add(new TreeNode(String.valueOf(asciiSymbol), occurrence)));
-
-        while (heap.size() > 1) {
-            var left = heap.poll();
-            var right = heap.poll();
-            // Merge nodes with the smallest occurrence into new node
-            heap.add(TreeNode.mergeNode(left,right));
-        }
-        // Return head of tree
-        return heap.peek();
-    }
-
-    /**
-     * Calculates the occurrence of ascii symbole in a text
-     * @param rawContent Lines of a file
-     * @return Map<asciiSymbol, occurrence percentage>
-     */
-    private Map<Character,Double> calculateOccurrence(List<String> rawContent) {
-        double totalCount = 0;
-        HashMap<Character, Integer> occurrenceCount = new HashMap<>();
-        for(String line : rawContent) {
-            for(char asciiSymbol : line.toCharArray()) {
-                totalCount++;
-                var entry = occurrenceCount.get(asciiSymbol);
-                if(entry == null) {
-                    occurrenceCount.put(asciiSymbol, 1);
-                } else {
-                    occurrenceCount.put(asciiSymbol,++entry);
-                }
-            }
-        }
-
-        HashMap<Character, Double> occurrencePercentage = new HashMap<>();
-        double finalTotalCount = totalCount;
-        occurrenceCount.forEach(
-                (asciiSymbol, count) -> occurrencePercentage.put(asciiSymbol, (count * 100)/ finalTotalCount)
-        );
-        return occurrencePercentage;
-    }
 
     /**
      * Encrypt plain text file with existing public key
