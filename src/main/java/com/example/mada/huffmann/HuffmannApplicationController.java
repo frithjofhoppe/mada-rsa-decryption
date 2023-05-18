@@ -1,4 +1,4 @@
-package com.example.mada_rsa_project_2;
+package com.example.mada.huffmann;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -6,7 +6,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.*;
-import java.math.BigInteger;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;

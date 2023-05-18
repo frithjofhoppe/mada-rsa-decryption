@@ -1,4 +1,4 @@
-package com.example.mada_rsa_project_2;
+package com.example.mada.huffmann;
 
 import java.util.Comparator;
 

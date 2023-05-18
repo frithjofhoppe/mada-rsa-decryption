@@ -1,4 +1,4 @@
-package com.example.mada_rsa_project_2;
+package com.example.mada.rsa;
 
 import java.io.*;
 import java.math.BigInteger;
