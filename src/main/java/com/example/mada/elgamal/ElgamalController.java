@@ -2,8 +2,10 @@ package com.example.mada.elgamal;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.math.BigInteger;
 import java.util.Random;
 
@@ -45,6 +47,18 @@ public class ElgamalController {
         // Decryption
         BigInteger decryptedMessage = decrypt(encryption);
         System.out.println("Decrypted Message: " + decryptedMessage);
+    }
+
+    /**
+     * Pick file from path (für Alain :-) )
+     *
+     * @param title
+     * @return
+     */
+    private File selectFile(String title) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle(title);
+        return fileChooser.showOpenDialog(stage);
     }
 
     private BigInteger generateRandomNumberLessThan(BigInteger limit) {
