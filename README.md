@@ -1,7 +1,14 @@
-# RSA Generator
-![ui](img.png)
+# Mada Projects
 
-## How to
+### El-Gamaal Task
+Logic is located [here](src/main/java/com/example/mada/elgamal/ElgamalController.java)
+
+### Huffmann Task
+Logic is located [here](src/main/java/com/example/mada/huffmann/HuffmannApplicationController.java)
+
+### RSA Task
+![ui](img.png)
+### How to
 1. Generate rsa key pair "1. Generate RSA Key Pair". The public (pk.txt) and private key (sk.txt) are stored in the project level directory
 2. Encrypt file by clicking  "2. Encrypt file"
    - Choosing the public key and then 
@@ -10,5 +17,5 @@
    - Choosing the private key and then 
    - the file you want to decrypt
 
-## Code
+### Code
 Logic is located [here](src/main/java/com/example/mada/RSAApplicationController.java)
