@@ -3,6 +3,8 @@ module com.example.mada {
     requires org.controlsfx.controls;
     requires javafx.fxml;
 
+    opens com.example.mada to javafx.fxml;
+
     exports com.example.mada.huffmann;
     opens com.example.mada.huffmann to javafx.fxml;
 
