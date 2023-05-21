@@ -1,13 +1,15 @@
 # Mada Projects
 
 ### El-Gamaal Task
-Logic is located [here](src/main/java/com/example/mada/elgamal/ElgamalController.java)
+> Logic is located [here](src/main/java/com/example/mada/elgamal/ElgamalController.java)
+
+<img alt="elgamaal" src="elgamaal.png" width="350">
 
 ### Huffmann Task
 Logic is located [here](src/main/java/com/example/mada/huffmann/HuffmannApplicationController.java)
 
 ### RSA Task
-![ui](img.png)
+![ui](rsa.png)
 ### How to
 1. Generate rsa key pair "1. Generate RSA Key Pair". The public (pk.txt) and private key (sk.txt) are stored in the project level directory
 2. Encrypt file by clicking  "2. Encrypt file"
