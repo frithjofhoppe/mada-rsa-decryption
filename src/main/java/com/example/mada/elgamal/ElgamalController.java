@@ -21,98 +21,6 @@ public class ElgamalController {
     private Stage stage;
     @FXML
     private Label welcomeText;
-    @FXML
-    public void decryptFile(){
-        // Check whether a private key is present at the file path
-        var privateKeyFile = new File("sk.txt");
-        if(!privateKeyFile.isFile()){
-            throw new RuntimeException("Public key doesn't exists in file path");
-        }
-
-        try {
-            var privateKey = new Key(
-                    primNumber,
-                    erzeuger,
-                    new BigInteger(Files.readAllLines(privateKeyFile.toPath()).get(0))
-            );
-            var rawFileContent = Files.readAllLines(
-                    selectFile("Select file with encrypted content (encrypted file)").toPath()
-            );
-            var decryptedContent = decryptFile(privateKey, rawFileContent);
-            FileWriter decryptedContentFw = new FileWriter("text-d.txt");
-            decryptedContentFw.write(decryptedContent);
-            decryptedContentFw.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private String decryptFile(Key privatKey, List<String> lines) {
-        StringBuilder sb = new StringBuilder();
-        for (String line : lines) {
-            for (String element : line.split(";")) {
-                var tuple = element.substring(1, element.length()-1).split(",");
-                var decrypted = decrypt(
-                        privatKey,
-                        new Encryption(
-                                new BigInteger(tuple[0]),
-                                new BigInteger(tuple[1])
-                        )
-                );
-                // Convert decrypted number back to ascii char
-                sb.append((char)decrypted.intValue());
-            }
-        }
-        return sb.toString();
-    }
-
-    @FXML
-    public void encryptFile(){
-
-        // Check whether a public key is present at the file path
-        var publicKeyFile = new File("pk.txt");
-        if(!publicKeyFile.isFile()){
-            throw new RuntimeException("Public key doesn't exists in file path");
-        }
-
-        try {
-            // Recover public key
-            var publicKey = new Key(
-                    primNumber,
-                    erzeuger,
-                    new BigInteger(Files.readAllLines(publicKeyFile.toPath()).get(0))
-            );
-            var rawFileContent = Files.readAllLines(
-                    selectFile("Select file with raw content (original file)").toPath()
-            );
-
-            // Encrypt each ascii symbol from file and save it as chiffre.txt
-            var encryptedContent = encryptFile(publicKey, rawFileContent);
-            FileWriter encryptedContentFw = new FileWriter("chiffre.txt");
-            encryptedContentFw.write(encryptedContent);
-            encryptedContentFw.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    };
-
-    private String encryptFile(Key publicKey, List<String> lines) {
-        List<String> pairs = new ArrayList<>();
-        for (String line : lines) {
-            for (char symbol : line.toCharArray()) {
-                // User ascii representation of letter for encryption
-                var encryption = encrypt(publicKey, BigInteger.valueOf((int)symbol));
-                pairs.add(
-                        String.format(
-                                "(%s,%s)",
-                                encryption.getKey(),
-                                encryption.getCipherText()
-                        )
-                );
-            }
-        }
-        return String.join(";", pairs);
-    }
 
     @FXML
     private void generateElgamal() {
@@ -149,6 +57,146 @@ public class ElgamalController {
         }
     }
 
+    @FXML
+    public void decryptFile(){
+        // Check whether a private key is present at the file path
+        var privateKeyFile = new File("sk.txt");
+        if(!privateKeyFile.isFile()){
+            throw new RuntimeException("Public key doesn't exists in file path");
+        }
+
+        try {
+            var privateKey = new Key(
+                    primNumber,
+                    erzeuger,
+                    new BigInteger(Files.readAllLines(privateKeyFile.toPath()).get(0))
+            );
+            var rawFileContent = Files.readAllLines(
+                    selectFile("Select file with encrypted content (encrypted file)").toPath()
+            );
+            var decryptedContent = decryptFile(privateKey, rawFileContent);
+            FileWriter decryptedContentFw = new FileWriter("text-d.txt");
+            decryptedContentFw.write(decryptedContent);
+            decryptedContentFw.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @FXML
+    public void encryptFile(){
+
+        // Check whether a public key is present at the file path
+        var publicKeyFile = new File("pk.txt");
+        if(!publicKeyFile.isFile()){
+            throw new RuntimeException("Public key doesn't exists in file path");
+        }
+
+        try {
+            // Recover public key
+            var publicKey = new Key(
+                    primNumber,
+                    erzeuger,
+                    new BigInteger(Files.readAllLines(publicKeyFile.toPath()).get(0))
+            );
+            var rawFileContent = Files.readAllLines(
+                    selectFile("Select file with raw content (original file)").toPath()
+            );
+
+            // Encrypt each ascii symbol from file and save it as chiffre.txt
+            var encryptedContent = encryptFile(publicKey, rawFileContent);
+            FileWriter encryptedContentFw = new FileWriter("chiffre.txt");
+            encryptedContentFw.write(encryptedContent);
+            encryptedContentFw.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    };
+
+    /**
+     * Encrypt single symbol in BitInteger representation
+     * @param key Private el gamaal key
+     * @param encryption encrypted pair (y1, y2)
+     * @return Decrypted symbol
+     */
+    private BigInteger decrypt(Key key, Encryption encryption) {
+        BigInteger secretKey = encryption.getKey().modPow(key.getB(), key.getPrimeNumber());
+
+        BigInteger modInverse = secretKey.modInverse(key.getPrimeNumber());
+
+        return encryption.getCipherText().multiply(modInverse).mod(key.getPrimeNumber());
+    }
+
+    /**
+     * Decrypt each char of text file
+     * @param privatKey: Private el gamaal key pair
+     * @param lines: Text file content
+     * @return Concatenated decrypted content
+     */
+    private String decryptFile(Key privatKey, List<String> lines) {
+        StringBuilder sb = new StringBuilder();
+        for (String line : lines) {
+            for (String element : line.split(";")) {
+                // Extract parameter from string ...;(y1,y2);...
+                var tuple = element
+                        .substring(1, element.length()-1)
+                        .split(",");
+                var decrypted = decrypt(
+                        privatKey,
+                        new Encryption(
+                                new BigInteger(tuple[0]),
+                                new BigInteger(tuple[1])
+                        )
+                );
+                // Convert decrypted number back to ascii char
+                sb.append((char)decrypted.intValue());
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Encrypt single symbol in BitInteger representation
+     * @param key Public el gamaal key
+     * @param message value from ascii character
+     * @return Encrypted symbol
+     */
+    private Encryption encrypt(Key key, BigInteger message) {
+        BigInteger randomNumberA = generateRandomNumberLessThan(key.getPrimeNumber());
+
+        BigInteger erzeugerHochA = key.getErzeuger().modPow(randomNumberA, key.getPrimeNumber());
+
+        BigInteger erzeugerHochBA = message.multiply(key.getB().modPow(randomNumberA, key.getPrimeNumber())).mod(key.getPrimeNumber());
+
+        return new Encryption(erzeugerHochA, erzeugerHochBA);
+    }
+
+    /**
+     * Encrypt each char of text file
+     * @param publicKey Public el gamaal key pair
+     * @param lines Text file content
+     * @return Concatenated encrypted content
+     */
+    private String encryptFile(Key publicKey, List<String> lines) {
+        List<String> pairs = new ArrayList<>();
+        for (String line : lines) {
+            for (char symbol : line.toCharArray()) {
+                // User ascii representation of letter for encryption
+                var encryption = encrypt(publicKey, BigInteger.valueOf((int)symbol));
+
+                // Add encrypted content as ...;(y1,y2);...
+                pairs.add(
+                        String.format(
+                                "(%s,%s)",
+                                encryption.getKey(),
+                                encryption.getCipherText()
+                        )
+                );
+            }
+        }
+        return String.join(";", pairs);
+    }
+
     /**
      * Pick file from path (für Alain :-) )
      *
@@ -163,7 +211,7 @@ public class ElgamalController {
 
     /**
      * Generate random number for assumed *phi of n group
-     * @param limit
+     * @param limit Max value for random generation
      * @return
      */
     private BigInteger generateRandomNumberLessThan(BigInteger limit) {
@@ -175,23 +223,5 @@ public class ElgamalController {
             randomNumber = new BigInteger(range.bitLength(), random);
         }
         return randomNumber.add(BigInteger.valueOf(1));
-    }
-
-    private Encryption encrypt(Key key, BigInteger message) {
-        BigInteger randomNumberA = generateRandomNumberLessThan(key.getPrimeNumber());
-
-        BigInteger erzeugerHochA = key.getErzeuger().modPow(randomNumberA, key.getPrimeNumber());
-
-        BigInteger erzeugerHochBA = message.multiply(key.getB().modPow(randomNumberA, key.getPrimeNumber())).mod(key.getPrimeNumber());
-
-        return new Encryption(erzeugerHochA, erzeugerHochBA);
-    }
-
-    private BigInteger decrypt(Key key, Encryption encryption) {
-        BigInteger secretKey = encryption.getKey().modPow(key.getB(), key.getPrimeNumber());
-
-        BigInteger modInverse = secretKey.modInverse(key.getPrimeNumber());
-
-        return encryption.getCipherText().multiply(modInverse).mod(key.getPrimeNumber());
     }
 }
