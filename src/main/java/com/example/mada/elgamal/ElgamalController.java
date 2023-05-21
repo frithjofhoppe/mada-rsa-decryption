@@ -18,38 +18,30 @@ public class ElgamalController {
 
     private final BigInteger primNumber = new BigInteger("FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7EDEE386BFB5A899FA5AE9F24117C4B1FE649286651ECE45B3DC2007CB8A163BF0598DA48361C55D39A69163FA8FD24CF5F83655D23DCA3AD961C62F356208552BB9ED529077096966D670C354E4ABC9804F1746C08CA18217C32905E462E36CE3BE39E772C180E86039B2783A2EC07A28FB5C55DF06F4C52C9DE2BCBF6955817183995497CEA956AE515D2261898FA051015728E5A8AACAA68FFFFFFFFFFFFFFFF", 16);
     private final BigInteger erzeuger = BigInteger.valueOf(2);
+    private final String publicKeyFileName = "pk.txt";
+    private final String privateKeyFileName = "sk.txt";
+    private final String innerDelimiter = ",";
+    private final String outerDelimiter = ";";
     private Stage stage;
     @FXML
     private Label welcomeText;
 
     @FXML
     private void generateElgamal() {
+        // Random element from {1 ... Gruppenordung - 1}
         BigInteger b =  generateRandomNumberLessThan(primNumber);
 
-        // generate public and private key
+        // Generate public and private key
         Key privateKey = new Key(primNumber, erzeuger, b);
         Key publicKey= new Key(primNumber, erzeuger, erzeuger.modPow(b, primNumber));
 
-        // Message to be encrypted
-        BigInteger message = new BigInteger("700");
-
-        // Encryption
-        Encryption encryption = encrypt(publicKey, message);
-
-        System.out.println("Encrypted Message: " + encryption.getCipherText());
-        System.out.println("Random Number k: " + encryption.getKey());
-
-        // Decryption
-        BigInteger decryptedMessage = decrypt(privateKey, encryption);
-        System.out.println("Decrypted Message: " + decryptedMessage);
-
         try {
             // Save public key in pk.txt
-            FileWriter publicKeyFw = new FileWriter("pk.txt");
+            FileWriter publicKeyFw = new FileWriter(publicKeyFileName);
             publicKeyFw.write(publicKey.getB().toString());
             publicKeyFw.close();
 
-            FileWriter privateKeyFw = new FileWriter("sk.txt");
+            FileWriter privateKeyFw = new FileWriter(privateKeyFileName);
             privateKeyFw.write(privateKey.getB().toString());
             privateKeyFw.close();
         } catch (IOException e) {
@@ -60,7 +52,7 @@ public class ElgamalController {
     @FXML
     public void decryptFile(){
         // Check whether a private key is present at the file path
-        var privateKeyFile = new File("sk.txt");
+        var privateKeyFile = new File(privateKeyFileName);
         if(!privateKeyFile.isFile()){
             throw new RuntimeException("Public key doesn't exists in file path");
         }
@@ -87,7 +79,7 @@ public class ElgamalController {
     public void encryptFile(){
 
         // Check whether a public key is present at the file path
-        var publicKeyFile = new File("pk.txt");
+        var publicKeyFile = new File(publicKeyFileName);
         if(!publicKeyFile.isFile()){
             throw new RuntimeException("Public key doesn't exists in file path");
         }
@@ -136,11 +128,11 @@ public class ElgamalController {
     private String decryptFile(Key privatKey, List<String> lines) {
         StringBuilder sb = new StringBuilder();
         for (String line : lines) {
-            for (String element : line.split(";")) {
+            for (String element : line.split(outerDelimiter)) {
                 // Extract parameter from string ...;(y1,y2);...
                 var tuple = element
                         .substring(1, element.length()-1)
-                        .split(",");
+                        .split(innerDelimiter);
                 var decrypted = decrypt(
                         privatKey,
                         new Encryption(
@@ -187,14 +179,15 @@ public class ElgamalController {
                 // Add encrypted content as ...;(y1,y2);...
                 pairs.add(
                         String.format(
-                                "(%s,%s)",
+                                "(%s%s%s)",
                                 encryption.getKey(),
+                                innerDelimiter,
                                 encryption.getCipherText()
                         )
                 );
             }
         }
-        return String.join(";", pairs);
+        return String.join(outerDelimiter, pairs);
     }
 
     /**
