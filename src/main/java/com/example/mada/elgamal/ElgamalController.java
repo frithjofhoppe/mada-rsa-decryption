@@ -36,6 +36,7 @@ public class ElgamalController {
         Key publicKey= new Key(primNumber, erzeuger, erzeuger.modPow(b, primNumber));
 
         try {
+            // Exercise 2
             // Save public key in pk.txt
             FileWriter publicKeyFw = new FileWriter(publicKeyFileName);
             publicKeyFw.write(publicKey.getB().toString());
@@ -49,6 +50,9 @@ public class ElgamalController {
         }
     }
 
+    /**
+     * Exercise 4
+     */
     @FXML
     public void decryptFile(){
         // Check whether a private key is present at the file path
@@ -75,6 +79,9 @@ public class ElgamalController {
         }
     }
 
+    /**
+     * Exercise 3
+     */
     @FXML
     public void encryptFile(){
 
