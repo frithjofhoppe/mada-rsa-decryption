@@ -5,8 +5,13 @@
 
 <img alt="elgamaal" src="elgamaal.png" width="350">
 
+### Usage
+Public and private key are generated wit the first button "1. Generate el gamaal key". If you want to decode/encpde a file with external public/private keys, you have to place them in the project root folder as "sk.txt" respectively "pk.txt"
+
 ### Huffmann Task
-Logic is located [here](src/main/java/com/example/mada/huffmann/HuffmannApplicationController.java)
+> Logic is located [here](src/main/java/com/example/mada/huffmann/HuffmannApplicationController.java)
+
+<img alt="elgamaal" src="huffmann.png" width="350">
 
 ### RSA Task
 ![ui](rsa.png)
