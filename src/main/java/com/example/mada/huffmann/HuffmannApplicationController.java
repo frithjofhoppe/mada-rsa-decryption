@@ -1,6 +1,7 @@
 package com.example.mada.huffmann;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -54,6 +55,15 @@ public class HuffmannApplicationController {
             FileWriter decTab = new FileWriter(HUFFMAN_TABLE_FILE_NAME);
             decTab.write(dictionaryOutput);
             decTab.close();
+
+            showInfo(
+                    "Files created",
+                    String.format(
+                            "Dictionary and encoded file has been created and saved as %s and %s in the project folder",
+                            HUFFMAN_TABLE_FILE_NAME,
+                            HUFFMAN_ENCODED_FILE_NAME
+                    )
+            );
         } catch (IOException e) {
             System.out.println("Error when reading/writing file file");
         }
@@ -98,6 +108,11 @@ public class HuffmannApplicationController {
             decodedContentFw.write(decodedContent);
             decodedContentFw.close();
             System.out.println(decodedContent);
+
+            showInfo(
+                    "File decoded",
+                    String.format("Files has been decoded and saved as %s in the project folder", HUFFMAN_DECODED_FILE_NAME)
+            );
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -303,5 +318,13 @@ public class HuffmannApplicationController {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle(title);
         return fileChooser.showOpenDialog(stage);
+    }
+
+    private void showInfo(String title, String msg) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(title);
+        alert.setContentText(msg);
+        alert.show();
     }
 }

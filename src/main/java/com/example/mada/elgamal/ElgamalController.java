@@ -1,6 +1,7 @@
 package com.example.mada.elgamal;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -45,6 +46,8 @@ public class ElgamalController {
             FileWriter privateKeyFw = new FileWriter(privateKeyFileName);
             privateKeyFw.write(privateKey.getB().toString());
             privateKeyFw.close();
+
+            showInfo("Files created", "The pk.txt and sk.txt have been created in the project direcotry");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -74,6 +77,10 @@ public class ElgamalController {
             FileWriter decryptedContentFw = new FileWriter("text-d.txt");
             decryptedContentFw.write(decryptedContent);
             decryptedContentFw.close();
+            showInfo(
+                    "File decrypted",
+                    "Content has been encrypted and saved as text-d.txt in the main project folder"
+            );
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -107,6 +114,10 @@ public class ElgamalController {
             FileWriter encryptedContentFw = new FileWriter("chiffre.txt");
             encryptedContentFw.write(encryptedContent);
             encryptedContentFw.close();
+            showInfo(
+                    "File encrypted",
+                    "Content has been encrypted and saved as chiffre.txt in the main project folder"
+            );
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -223,5 +234,13 @@ public class ElgamalController {
             randomNumber = new BigInteger(range.bitLength(), random);
         }
         return randomNumber.add(BigInteger.valueOf(1));
+    }
+
+    private void showInfo(String title, String msg) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(title);
+        alert.setContentText(msg);
+        alert.show();
     }
 }
